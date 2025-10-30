@@ -1,0 +1,31 @@
+name: Codex Auto Commit
+on:
+  push:
+    paths:
+      - 'codex/outputs/**'
+  workflow_dispatch:
+
+jobs:
+  commit-codex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: false
+
+      - name: Configure git
+        run: |
+          git config user.name "Codex Bot"
+          git config user.email "codex@andup.net"
+
+      - name: Commit & Push generated files
+        run: |
+          git add codex/outputs
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore(codex): auto-commit generated output [skip ci]"
+            git push
+          fi
