@@ -9,21 +9,28 @@ export default function UploadForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!file) return;
+    if (!file) {
+      setMessage("ファイルを選んでください");
+      return;
+    }
 
     setMessage("アップロード中…");
 
+    const formData = new FormData();
+    formData.append("file", file);
+
     const response = await fetch("/api/upload", {
       method: "POST",
-      body: file,
+      body: formData,
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      setMessage(`アップロード完了！URL: ${data.url}`);
-    } else {
+    if (!response.ok) {
       setMessage("アップロード失敗");
+      return;
     }
+
+    const data = await response.json();
+    setMessage(`アップロード完了！URL: ${data.url}`);
   }
 
   return (
