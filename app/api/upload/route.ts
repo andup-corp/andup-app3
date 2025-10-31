@@ -2,26 +2,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 
-export const runtime = "edge"; // edgeじゃなければ消してOK
+export const runtime = "edge"; // 残してOK、外してもOK
 
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get("file");
+    const fileOrBlob = formData.get("file");
 
-    if (!file || !(file instanceof File)) {
+    // ここがポイント：File じゃなくても Blob ならOKにする
+    if (!fileOrBlob || (typeof fileOrBlob !== "object")) {
       return NextResponse.json(
         { ok: false, error: "file is required" },
         { status: 400 }
       );
     }
 
+    // Fileの場合は名前があるので使う。なければ固定名。
+    const isFile = typeof File !== "undefined" && fileOrBlob instanceof File;
+    const originalName = isFile ? (fileOrBlob as File).name : "upload.bin";
+
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const originalName = file.name || "upload.bin";
     const filename = `uploads/${timestamp}-${originalName}`;
 
-    // ★ここがポイント：Uint8Arrayにせず、Fileのまま渡す
-    const blob = await put(filename, file, {
+    // put は Blob も File もそのまま受けられる
+    const blob = await put(filename, fileOrBlob as Blob, {
       access: "public",
     });
 
