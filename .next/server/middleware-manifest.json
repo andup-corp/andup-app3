@@ -1,6 +1,34 @@
 {
   "version": 3,
   "middleware": {},
-  "functions": {},
+  "functions": {
+    "/api/upload/route": {
+      "files": [
+        "server/middleware-build-manifest.js",
+        "server/middleware-react-loadable-manifest.js",
+        "server/next-font-manifest.js",
+        "server/interception-route-rewrite-manifest.js",
+        "server/edge-runtime-webpack.js",
+        "server/app/api/upload/route.js"
+      ],
+      "name": "app/api/upload/route",
+      "page": "/api/upload/route",
+      "matchers": [
+        {
+          "regexp": "^/api/upload$",
+          "originalSource": "/api/upload"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "975HUhBwFTQL1PwscaXMl",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "Hf/LCLarZHJe7RVVH9w0KCHxJoEnO58YBqa6PGvIiH8=",
+        "__NEXT_PREVIEW_MODE_ID": "a1404494958645b605c1f2ee2d6e3423",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "6117b40abe5a1dc711f696b68b61cd3a89bd6b32de4dbaeb6dd976901831207d",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "0ec727ca00f1ad556b70ce079f21f3ae55c00b69cd38bed8c4b5c480ccf51fb5"
+      }
+    }
+  },
   "sortedMiddleware": []
 }
