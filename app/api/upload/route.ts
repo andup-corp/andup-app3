@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 
-export const runtime = "edge"; // edgeがイヤなら消してOK
+export const runtime = "edge"; // edgeじゃなければ消してOK
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,11 +16,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 元のファイル名を残したいので取る。なければ日時で。
-    const originalName = file.name || "upload.pdf";
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const originalName = file.name || "upload.bin";
     const filename = `uploads/${timestamp}-${originalName}`;
 
+    // ★ここがポイント：Uint8Arrayにせず、Fileのまま渡す
     const blob = await put(filename, file, {
       access: "public",
     });
@@ -41,4 +41,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
