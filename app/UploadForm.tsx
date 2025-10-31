@@ -17,24 +17,21 @@ export default function UploadForm() {
 
     setMessage("アップロード中…");
 
-    // ★ここが超重要：FormDataで送る
     const formData = new FormData();
-    formData.append("file", file); // ←サーバー側の「file」と一致させる
+    formData.append("file", file);
 
     const res = await fetch("/api/upload", {
       method: "POST",
       body: formData,
     });
 
+    const data = await res.json().catch(() => null);
+
     if (!res.ok) {
-      const err = await res.json().catch(() => null);
-      setMessage(
-        "アップロード失敗" + (err?.error ? `：${err.error}` : "")
-      );
+      setMessage("アップロード失敗" + (data?.error ? `：${data.error}` : ""));
       return;
     }
 
-    const data = await res.json();
     setMessage(`アップロード完了！URL: ${data.url}`);
   }
 
