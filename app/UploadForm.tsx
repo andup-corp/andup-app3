@@ -9,6 +9,7 @@ export default function UploadForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     if (!file) {
       setMessage("ファイルを選んでください");
       return;
@@ -16,20 +17,24 @@ export default function UploadForm() {
 
     setMessage("アップロード中…");
 
+    // ★ここが超重要：FormDataで送る
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", file); // ←サーバー側の「file」と一致させる
 
-    const response = await fetch("/api/upload", {
+    const res = await fetch("/api/upload", {
       method: "POST",
       body: formData,
     });
 
-    if (!response.ok) {
-      setMessage("アップロード失敗");
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      setMessage(
+        "アップロード失敗" + (err?.error ? `：${err.error}` : "")
+      );
       return;
     }
 
-    const data = await response.json();
+    const data = await res.json();
     setMessage(`アップロード完了！URL: ${data.url}`);
   }
 
@@ -38,8 +43,7 @@ export default function UploadForm() {
       <input
         type="file"
         accept="application/pdf"
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
-        className="block"
+        onChange={(e) => setFile(e.target.files?.[0] ?? null)}
       />
       <button
         type="submit"
@@ -51,4 +55,3 @@ export default function UploadForm() {
     </form>
   );
 }
-
