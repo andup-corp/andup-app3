@@ -2,19 +2,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 
-export const runtime = "edge"; // edgeでもOK。使いにくければ消してもいいです。
+export const runtime = "edge"; // edgeがイヤなら消してOK
 
 export async function POST(req: NextRequest) {
   try {
-    // フロントからは「生のファイル」が送られてくる想定
-    const arrayBuffer = await req.arrayBuffer();
+    const formData = await req.formData();
+    const file = formData.get("file");
+
+    if (!file || !(file instanceof File)) {
+      return NextResponse.json(
+        { ok: false, error: "file is required" },
+        { status: 400 }
+      );
+    }
+
+    const arrayBuffer = await file.arrayBuffer();
     const bytes = new Uint8Array(arrayBuffer);
 
-    // ファイル名を適当に生成（PDF前提）
+    // 元のファイル名を残したいので取る。なければ日時で。
+    const originalName = file.name || "upload.pdf";
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const filename = `uploads/${timestamp}.pdf`;
+    const filename = `uploads/${timestamp}-${originalName}`;
 
-    // Vercel Blob にアップロード
     const blob = await put(filename, bytes, {
       access: "public",
     });
@@ -29,6 +38,10 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     console.error("upload error", error);
-    return NextResponse.json({ ok: false, error: "upload failed" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "upload failed" },
+      { status: 500 }
+    );
   }
 }
+
