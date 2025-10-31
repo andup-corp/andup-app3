@@ -1,42 +1,44 @@
 // app/api/upload/route.ts
-import { put } from '@vercel/blob';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
+import { put } from "@vercel/blob";
 
-export const runtime = 'nodejs';
+export const runtime = "edge"; // edgeがイヤなら消してOK
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
+    const formData = await req.formData();
+    const file = formData.get("file");
 
-    if (!token) {
+    if (!file || !(file instanceof File)) {
       return NextResponse.json(
-        { error: 'BLOB_READ_WRITE_TOKEN が設定されていません' },
+        { ok: false, error: "file is required" },
         { status: 400 }
       );
     }
 
-    const formData = await req.formData();
-    const file = formData.get('file') as File | null;
+    // 元のファイル名を残したいので取る。なければ日時で。
+    const originalName = file.name || "upload.pdf";
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filename = `uploads/${timestamp}-${originalName}`;
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
-    }
-
-    const blob = await put(`uploads/${file.name}`, file, {
-      access: 'public',
-      token, // ← ここで明示的に渡す
+    const blob = await put(filename, file, {
+      access: "public",
     });
 
-    return NextResponse.json({
-      ok: true,
-      url: blob.url,
-      pathname: blob.pathname,
-    });
-  } catch (error: any) {
-    console.error('upload error', error);
     return NextResponse.json(
-      { error: error?.message || 'Upload failed' },
+      {
+        ok: true,
+        url: blob.url,
+        pathname: blob.pathname,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("upload error", error);
+    return NextResponse.json(
+      { ok: false, error: "upload failed" },
       { status: 500 }
     );
   }
 }
+
