@@ -1,7 +1,5 @@
-/node_modules
-/.next
-/.vercel
+# local env
 .env
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+.env.local
+
+node_modules
