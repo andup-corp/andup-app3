@@ -1,3 +1,3 @@
 export default function UploadsPage() {
-  return <main>/uploads ページ（あとで実装）</main>;
+return <main>/uploads ページ</main>;
 }
