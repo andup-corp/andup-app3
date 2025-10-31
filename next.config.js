@@ -1,8 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // App Routerはデフォルトで有効なので experimental.appDir は不要
   experimental: {
-    appDir: true,
+    // 他に使ってるexperimentalがあればここに書く
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
